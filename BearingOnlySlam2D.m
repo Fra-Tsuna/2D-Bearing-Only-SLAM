@@ -14,7 +14,7 @@ source "functions.m";
 #init poses
 Nr=length(pose_gt);
 Xr_gt = zeros(3,3,Nr);
-pose_id2index = zeros(Nr); 
+pose_id2index = zeros(1,Nr); 
 
 for i=1:Nr
     x_gt=[pose_gt(i).x, pose_gt(i).y, pose_gt(i).theta];
@@ -25,7 +25,7 @@ end
 #init landmarks positions
 Nl=length(land_gt);
 Xl_gt = zeros(2,Nl);
-land_id2index = zeros(Nl); 
+land_id2index = zeros(1,Nl); 
 
 for i=1:Nl
     Xl_gt(:,i) = [land_gt(i).x_pose; land_gt(i).y_pose];
@@ -42,7 +42,7 @@ for i=1:length(obs_gt)
 end
 
 #init bearing measurements
-Zl=zeros(Ml);
+Zl=zeros(1,Ml);
 associations_Zl = zeros(2,Ml);
 
 #create for each bearing measurement an association between the pose that recorded it
@@ -52,7 +52,7 @@ for i=1:length(obs_gt)
     observations = obs_gt(i);
     pose_id = observations.pose_id;
     pose_index = find(pose_id2index==pose_id);
-    num_observations = length(observation.observations);
+    num_observations = length(observations.observation);
     for j=1:num_observations
         measurement = observations.observation(j);
         land_id = measurement.id;
@@ -79,5 +79,5 @@ for i=1:Mr
     pose_from_index = find(pose_id2index==pose_from_id);
     pose_to_index = find(pose_id2index==pose_to_id);
     associations_Zr(:,i) = [pose_from_index; pose_to_index];
-    Zr(:,:,i) = v2t(transition(i).v);
+    Zr(:,:,i) = v2t(transition.v);
 end
