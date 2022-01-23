@@ -59,6 +59,11 @@ function [landmarks, poses, transitions, observations] = loadG2o(filepath)
 	i_edge_bearing_se2_xy=0;
   
 	%    
+	landmarks = struct();
+	observations = struct();
+	poses = struct();
+	transitions = struct();
+
 	curr_id = -1;
 
 	while true
