@@ -103,7 +103,28 @@ end
 
 #landmarks triangulation for landmarks initial guess position
 
+[out,indices] = sort(associations_Zl_ig(2,:));
+landmark_ids = unique(out);
+obs_per_landmarks = zeros(size(landmark_ids));
 
+for i=1:length(landmark_ids)
+    landmark_id = landmark_ids(i);
+    bearing_values = Zl_ig(find(associations_Zl_ig(2,:)==landmark_id));
+    rob_poses_from_land_id = associations_Zl_ig(1,:)(find(associations_Zl_ig(2,:)==landmark_id));
+    for j = 1:length(bearing_values)
+        rob_pose = t2v(Xr_ig(:,:,rob_poses_from_land_id(j)));
+        disp(rob_pose(3,j));
+        bearing_values(j) = bearing_values(j) + rob_pose(3);
+        bearing_values(j) = atan2(sin(bearing_values(j))/cos(bearing_values(j)));
+    end
+
+    obs_per_landmarks(landmark_id) = sum(out==landmark_id);
+
+    %%now we look for the 2 best poses in order to do the triangulation
+    
+end
+
+#plots and figures
 figure(1);
 grid;
 plot(Xl(1,:),Xl(2,:),'b*',"linewidth",2);
