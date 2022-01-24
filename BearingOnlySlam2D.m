@@ -5,6 +5,7 @@ clc;
 addpath "./g2o_wrapper";
 addpath "./dataset";
 source "functions.m";
+source "do_Least_Square_Magic.m"
 
 ##Extraction of data from .g2o files
 
@@ -145,6 +146,10 @@ for i=1:length(landmark_ids)
         Xl_ig(:,landmark_id) = intersect_lines(p11,p12,p21,p22);
     endif
 end
+
+iterations=100;
+
+[Xr_corr, Xl_corr, chi_stats] = do_Least_Square_Magic(Xr_ig, Xl_ig, Zl_ig, associations_Zl_ig, Zr_ig, associations_Zr_ig, iterations);
 
 
 #plots and figures
