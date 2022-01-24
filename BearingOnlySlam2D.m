@@ -43,11 +43,11 @@ end
 
 #init landmarks positions (gt)
 Nl=length(land_gt);
-Xl = zeros(2,Nl);
+Xl_gt = zeros(2,Nl);
 land_id2index = zeros(1,Nl); 
 
 for i=1:Nl
-    Xl(:,i) = [land_gt(i).x_pose; land_gt(i).y_pose];
+    Xl_gt(:,i) = [land_gt(i).x_pose; land_gt(i).y_pose];
     land_id2index(i) = land_gt(i).id;
 end
 
@@ -102,33 +102,58 @@ for i=1:Mr_ig
 end
 
 #landmarks triangulation for landmarks initial guess position
+Xl_ig =zeros(2,Nl);
 
-[out,indices] = sort(associations_Zl_ig(2,:));
-landmark_ids = unique(out);
+[associations_sorted,indices] = sort(associations_Zl_ig(2,:));
+landmark_ids = unique(associations_sorted);
 obs_per_landmarks = zeros(size(landmark_ids));
 
 for i=1:length(landmark_ids)
     landmark_id = landmark_ids(i);
     bearing_values = Zl_ig(find(associations_Zl_ig(2,:)==landmark_id));
     rob_poses_from_land_id = associations_Zl_ig(1,:)(find(associations_Zl_ig(2,:)==landmark_id));
+    rob_poses = zeros(3,length(bearing_values));
     for j = 1:length(bearing_values)
-        rob_pose = t2v(Xr_ig(:,:,rob_poses_from_land_id(j)));
-        disp(rob_pose(3,j));
-        bearing_values(j) = bearing_values(j) + rob_pose(3);
-        bearing_values(j) = atan2(sin(bearing_values(j))/cos(bearing_values(j)));
+        rob_poses(:,j) = t2v(Xr_ig(:,:,rob_poses_from_land_id(j)));
+        bearing_values(j) = bearing_values(j) + rob_poses(3,j);
+        bearing_values(j) = atan2(sin(bearing_values(j)),cos(bearing_values(j)));
     end
 
-    obs_per_landmarks(landmark_id) = sum(out==landmark_id);
+    obs_per_landmarks(landmark_id) = sum(associations_sorted==landmark_id);
 
     %%now we look for the 2 best poses in order to do the triangulation
-    
+    A = zeros(obs_per_landmarks(landmark_id),obs_per_landmarks(landmark_id));
+    for m=1:obs_per_landmarks(landmark_id)-1
+        for n=(m+1):obs_per_landmarks(landmark_id)
+            A(m,n) = box_minus(bearing_values(m),bearing_values(n));
+            if A(m,n)>pi/2
+                A(m,n)=pi-A(m,n);
+            endif
+        end
+    end
+    [rob_pose_1, rob_pose_2] = find(A==max(max(A)));
+
+    if(obs_per_landmarks(landmark_id)==1)
+        Xl_ig(:,landmark_id) = rob_poses(1:2,1)+[cos(rob_poses(3,1)); sin(rob_poses(3,1))];
+    else
+        p11 = rob_poses(1:2,rob_pose_1);
+        theta1 = bearing_values(rob_pose_1);
+        p12 = p11 + [cos(theta1); sin(theta1)];
+        p21 = rob_poses(1:2,rob_pose_2);
+        theta2 = bearing_values(rob_pose_2);
+        p22 = p21 + [cos(theta2); sin(theta2)];
+        Xl_ig(:,landmark_id) = intersect_lines(p11,p12,p21,p22);
+    endif
 end
+
 
 #plots and figures
 figure(1);
-grid;
-plot(Xl(1,:),Xl(2,:),'b*',"linewidth",2);
+plot(Xl_gt(1,:),Xl_gt(2,:),'b*',"linewidth",2);
 hold on;
 plot(squeeze(Xr_gt(1,3,:)),squeeze(Xr_gt(2,3,:)),'b*-',"linewidth",2);
 hold on;
+plot(Xl_ig(1,:),Xl_ig(2,:),'g*',"linewidth",2);
+hold on;
 plot(squeeze(Xr_ig(1,3,:)),squeeze(Xr_ig(2,3,:)),'g*-',"linewidth",2);
+grid;
