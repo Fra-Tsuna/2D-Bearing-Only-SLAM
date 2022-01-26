@@ -53,7 +53,7 @@ function [e, Ji, Jj]=poseErrorAndJacobian(Xi,Xj,Z)
         ti=Xi(1:2,3);
         tj=Xj(1:2,3);
 
-        dR_0=[0 -1;1 0];
+        dR_0=[0, -1;1, 0];
 
         Z_hat=eye(3);
         Z_hat(1:2,1:2)=Ri'*Rj;
@@ -72,9 +72,20 @@ function [e, Ji, Jj]=poseErrorAndJacobian(Xi,Xj,Z)
 endfunction
 
 
+function [e, Jr_i, Jl_j] = bearingErrorAndJacobian(Xr_i, Xl_j, z);
+       R=Xr_i(1:2,1:2);
+       dR_0=[0, -1;1, 0];
+       t=Xr_i(1:2,3);
 
+       l_hat = R'*(Xl-t);
+       z_hat = atan2(l_hat(2),l_hat(1));
 
+       e=z_hat-z;
+       e=atan2(sin(e),cos(e)) 
 
+       Jr_i = (1./(l_hat(1:2)'*l_hat(1:2))*[-l_hat(2) l_hat(1)]) * [-R', R'*dR_0'*Xl_j];
+       Jl_j = (1./(l_hat(1:2)'*l_hat(1:2))*[-l_hat(2) l_hat(1)]) * R';
+endfunction
 
 
 function v_idx=poseMatrixIndex(pose_index, num_poses, num_landmarks)
@@ -89,6 +100,7 @@ function v_idx=poseMatrixIndex(pose_index, num_poses, num_landmarks)
 
         v_idx=1+(pose_index-1)*pose_dim;
 endfunction;
+
 
 function v_idx=landmarkMatrixIndex(landmark_index, num_poses, num_landmarks)
        

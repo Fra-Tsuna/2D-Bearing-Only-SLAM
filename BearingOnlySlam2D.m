@@ -149,7 +149,7 @@ end
 
 iterations=100;
 
-[Xr_corr, Xl_corr, chi_stats_poses, chi_stats_landmarks] = ...
+[Xr_corr, Xl_corr, chi_stats_poses, chi_stats_bearings] = ...
     do_Least_Square_Magic(Xr_ig, Xl_ig, Zl_ig, associations_Zl_ig, Zr_ig, associations_Zr_ig, iterations);
 
 
