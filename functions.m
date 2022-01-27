@@ -17,9 +17,9 @@ endfunction;
 
 
 function v=flattenIsometryByColumns(T)
-        v=zeros(12,1);
-        v(1:9)=reshape(T(1:3,1:3),9,1);
-        v(10:12)=T(1:3,4);
+        v=zeros(6,1);
+        v(1:4)=reshape(T(1:2,1:2),4,1);
+        v(5:6)=T(1:2,3);
 endfunction
 
 
@@ -35,6 +35,22 @@ function delta_theta = box_minus(theta1, theta2)
 endfunction;
 
 
+function [X_r, X_l] = box_plus(X_r, X_l, delta_X, Nr, Nl)
+        pose_dim = 3;
+        landmark_dim = 2;
+        for i=1:Nr
+                pose_i = poseMatrixIndex(i, Nr, Nl);
+                delta_Xr = delta_X(pose_i:pose_i+pose_dim-1,:)
+                X_r(:,:,pose_i)=v2t(delta_Xr)*X_r(:,:,pose_i);
+        end
+        for i=1:Nl
+                land_i = landmarkMatrixIndex(i, Nr, Nl);
+                delta_Xl = delta_X(land_i:land_i+landmark_dim-1,:);
+                X_l(:,land_i)=delta_Xl + X_l(:,land_i);
+        end
+endfunction
+
+
 function point = intersect_lines(p11,p12,p21,p22)
         k1 = (p12(2)-p11(2))/(p12(1)-p11(1));
         k2 = (p22(2)-p21(2))/(p22(1)-p21(1));
@@ -46,7 +62,7 @@ function point = intersect_lines(p11,p12,p21,p22)
 endfunction;
 
 
-function [e, Ji, Jj]=poseErrorAndJacobian(Xi,Xj,Z)
+function [err, Ji, Jj]=poseErrorAndJacobian(Xi,Xj,Z)
         Ri=Xi(1:2,1:2);
         Rj=Xj(1:2,1:2);
 
@@ -59,7 +75,7 @@ function [e, Ji, Jj]=poseErrorAndJacobian(Xi,Xj,Z)
         Z_hat(1:2,1:2)=Ri'*Rj;
         Z_hat(1:2,3)=Ri'*(tj-ti);
 
-        e=flattenIsometryByColumns(Z_hat-Z);
+        err=flattenIsometryByColumns(Z_hat-Z);
 
         Ji=zeros(6,3);
         Jj=zeros(6,3);
@@ -72,16 +88,16 @@ function [e, Ji, Jj]=poseErrorAndJacobian(Xi,Xj,Z)
 endfunction
 
 
-function [e, Jr_i, Jl_j] = bearingErrorAndJacobian(Xr_i, Xl_j, z);
+function [err, Jr_i, Jl_j] = bearingErrorAndJacobian(Xr_i, Xl_j, z);
        R=Xr_i(1:2,1:2);
        dR_0=[0, -1;1, 0];
        t=Xr_i(1:2,3);
 
-       l_hat = R'*(Xl-t);
+       l_hat = R'*(Xl_j-t);
        z_hat = atan2(l_hat(2),l_hat(1));
 
-       e=z_hat-z;
-       e=atan2(sin(e),cos(e)) 
+       err=z_hat-z;
+       err=atan2(sin(err),cos(err));
 
        Jr_i = (1./(l_hat(1:2)'*l_hat(1:2))*[-l_hat(2) l_hat(1)]) * [-R', R'*dR_0'*Xl_j];
        Jl_j = (1./(l_hat(1:2)'*l_hat(1:2))*[-l_hat(2) l_hat(1)]) * R';
@@ -90,8 +106,8 @@ endfunction
 
 function v_idx=poseMatrixIndex(pose_index, num_poses, num_landmarks)
 
-        pose_dim=6;
-        landmark_dim=3;
+        pose_dim=3;
+        landmark_dim=2;
 
         if (pose_index>num_poses)
                 v_idx=-1;
@@ -104,8 +120,8 @@ endfunction;
 
 function v_idx=landmarkMatrixIndex(landmark_index, num_poses, num_landmarks)
        
-        pose_dim=6;
-        landmark_dim=3;
+        pose_dim=3;
+        landmark_dim=2;
 
         if (landmark_index>num_landmarks)
                 v_idx=-1;
