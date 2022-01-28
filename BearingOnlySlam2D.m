@@ -163,3 +163,13 @@ plot(Xl_ig(1,:),Xl_ig(2,:),'g*',"linewidth",2);
 hold on;
 plot(squeeze(Xr_ig(1,3,:)),squeeze(Xr_ig(2,3,:)),'g*-',"linewidth",2);
 grid;
+
+figure(2);
+plot(Xl_gt(1,:),Xl_gt(2,:),'b*',"linewidth",2);
+hold on;
+plot(squeeze(Xr_gt(1,3,:)),squeeze(Xr_gt(2,3,:)),'b*-',"linewidth",2);
+hold on;
+plot(Xl_corr(1,:),Xl_corr(2,:),'r*',"linewidth",2);
+hold on;
+plot(squeeze(Xr_corr(1,3,:)),squeeze(Xr_corr(2,3,:)),'r*-',"linewidth",2);
+grid;

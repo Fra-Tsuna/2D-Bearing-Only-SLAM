@@ -40,13 +40,13 @@ function [X_r, X_l] = box_plus(X_r, X_l, delta_X, Nr, Nl)
         landmark_dim = 2;
         for i=1:Nr
                 pose_i = poseMatrixIndex(i, Nr, Nl);
-                delta_Xr = delta_X(pose_i:pose_i+pose_dim-1,:)
-                X_r(:,:,pose_i)=v2t(delta_Xr)*X_r(:,:,pose_i);
+                delta_Xr = delta_X(pose_i:pose_i+pose_dim-1,:);
+                X_r(:,:,i)=v2t(delta_Xr)*X_r(:,:,i);
         end
         for i=1:Nl
                 land_i = landmarkMatrixIndex(i, Nr, Nl);
                 delta_Xl = delta_X(land_i:land_i+landmark_dim-1,:);
-                X_l(:,land_i)=delta_Xl + X_l(:,land_i);
+                X_l(:,i)=delta_Xl + X_l(:,i);
         end
 endfunction
 
@@ -69,22 +69,23 @@ function [err, Ji, Jj]=poseErrorAndJacobian(Xi,Xj,Z)
         ti=Xi(1:2,3);
         tj=Xj(1:2,3);
 
-        dR_0=[0, -1;1, 0];
+        dR_0=[0 -1;1 0];
 
         Z_hat=eye(3);
         Z_hat(1:2,1:2)=Ri'*Rj;
         Z_hat(1:2,3)=Ri'*(tj-ti);
 
-        err=flattenIsometryByColumns(Z_hat-Z);
+        err = [(Z_hat-Z)(1:2,1); (Z_hat-Z)(1:2,2); (Z_hat-Z)(1:2,3)];
 
         Ji=zeros(6,3);
         Jj=zeros(6,3);
 
         Jj(1:4,3)=reshape(Ri'*dR_0*Rj, 4, 1);
+        
         Jj(5:6,1:2)=Ri';
 
         Jj(5:6,3)=Ri'*dR_0*tj;
-        Ji=-Jj;
+        Ji=Ji-Jj;
 endfunction
 
 
@@ -105,7 +106,6 @@ endfunction
 
 
 function v_idx=poseMatrixIndex(pose_index, num_poses, num_landmarks)
-
         pose_dim=3;
         landmark_dim=2;
 
