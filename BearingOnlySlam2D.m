@@ -5,7 +5,7 @@ clc;
 addpath "./g2o_wrapper";
 addpath "./dataset";
 source "functions.m";
-source "do_Least_Square_Magic.m"
+source "do_Least_Square_Magic.m";
 
 ##Extraction of data from .g2o files
 
@@ -148,6 +148,7 @@ for i=1:length(landmark_ids)
 end
 
 iterations=5;
+clc;
 
 [Xr_corr, Xl_corr, chi_stats_poses, chi_stats_bearings] = ...
     do_Least_Square_Magic(Xr_ig, Xl_ig, Zl_ig, associations_Zl_ig, Zr_ig, associations_Zr_ig, iterations);
@@ -162,7 +163,10 @@ hold on;
 plot(Xl_ig(1,:),Xl_ig(2,:),'g*',"linewidth",2);
 hold on;
 plot(squeeze(Xr_ig(1,3,:)),squeeze(Xr_ig(2,3,:)),'g*-',"linewidth",2);
+title("Groundtruth vs Initial Guess");
+legend("GT lands", "GT poses", "IG lands", "IG poses", "location", "southeast");
 grid;
+saveas(1,"./results/initialdata.png");
 
 figure(2);
 plot(Xl_gt(1,:),Xl_gt(2,:),'b*',"linewidth",2);
@@ -172,4 +176,25 @@ hold on;
 plot(Xl_corr(1,:),Xl_corr(2,:),'r*',"linewidth",2);
 hold on;
 plot(squeeze(Xr_corr(1,3,:)),squeeze(Xr_corr(2,3,:)),'r*-',"linewidth",2);
+title("Groundtruth vs Correction");
+legend("GT lands", "GT poses", "LS lands", "LS poses", "location", "southeast")
+grid;
+saveas(2,"./results/afterLS.png");
+
+figure(3);
+plot(chi_stats_bearings);
+title("Chi stats bearings");
+saveas(3,"./results/chi_bearings.png");
+grid;
+
+figure(4);
+plot(chi_stats_poses);
+title("Chi stats poses");
+saveas(4,"./results/chi_poses.png");
+grid;
+
+figure(5);
+plot(chi_stats_poses+chi_stats_bearings);
+title("Chi stats summed");
+saveas(5,"./results/chi_summed.png");
 grid;

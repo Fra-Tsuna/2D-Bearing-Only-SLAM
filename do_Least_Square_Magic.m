@@ -15,21 +15,22 @@ function [Xr_corr, Xl_corr, chi_stats_poses, chi_stats_bearings] = do_Least_Squa
     Xr_corr = Xr_ig;
     Xl_corr = Xl_ig;
 
+    disp("Starting Gauss-Newton algorithm...");
+
     for i=1:iterations
+        printf("Iteration: %d\n", i);
 
         Hr = zeros(state_dim, state_dim);
         br = zeros(state_dim,1);
         %handle poses
         for m=1:Mr
-            omega = eye(6);
-            omega(1:4,1:4) = (1e-5)*omega(1:4,1:4);
             pose_i = associations_Zr_ig(1,m);
             pose_j = associations_Zr_ig(2,m);
             z = Zr_ig(:,:,m);
             X_i = Xr_corr(:,:,pose_i);
             X_j = Xr_corr(:,:,pose_j);
             [err, Ji, Jj] = poseErrorAndJacobian(X_i, X_j, z);
-            chi_poses=err'*omega*err;
+            chi_poses=err'*err;
 
 			chi_stats_poses(i)+=chi_poses;
 
@@ -37,19 +38,19 @@ function [Xr_corr, Xl_corr, chi_stats_poses, chi_stats_bearings] = do_Least_Squa
             pose_j_H=poseMatrixIndex(pose_j, Nr, Nl);
 
             Hr(pose_i_H:pose_i_H+3-1,
-            pose_i_H:pose_i_H+3-1)+=Ji'*omega*Ji;
+            pose_i_H:pose_i_H+3-1)+=Ji'*Ji;
 
             Hr(pose_i_H:pose_i_H+3-1,
-            pose_j_H:pose_j_H+3-1)+=Ji'*omega*Jj;
+            pose_j_H:pose_j_H+3-1)+=Ji'*Jj;
 
             Hr(pose_j_H:pose_j_H+3-1,
-            pose_i_H:pose_i_H+3-1)+=Jj'*omega*Ji;
+            pose_i_H:pose_i_H+3-1)+=Jj'*Ji;
 
             Hr(pose_j_H:pose_j_H+3-1,
-            pose_j_H:pose_j_H+3-1)+=Jj'*omega*Jj;
+            pose_j_H:pose_j_H+3-1)+=Jj'*Jj;
 
-            br(pose_i_H:pose_i_H+3-1)+=Ji'*omega*err;
-            br(pose_j_H:pose_j_H+3-1)+=Jj'*omega*err;
+            br(pose_i_H:pose_i_H+3-1)+=Ji'*err;
+            br(pose_j_H:pose_j_H+3-1)+=Jj'*err;
         end
 
         Hl = zeros(state_dim, state_dim);
@@ -97,4 +98,5 @@ function [Xr_corr, Xl_corr, chi_stats_poses, chi_stats_bearings] = do_Least_Squa
         dx = [dx(1:(Nr-1)*3); zeros(3,1); dx((Nr-1)*3+1:end)];
         [Xr_corr, Xl_corr] = box_plus(Xr_corr, Xl_corr, dx, Nr, Nl);
     endfor   
+    disp("Done! Optimization completed.");
 endfunction
