@@ -23,7 +23,7 @@ function v=flattenIsometryByColumns(T)
 endfunction
 
 
-function delta_theta = box_minus(theta1, theta2)
+function delta_theta = diff_(theta1, theta2)
 	difference = theta2-theta1;
     if (difference>pi)
         delta_theta = abs(difference-2*pi);

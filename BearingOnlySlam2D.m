@@ -126,7 +126,7 @@ for i=1:length(landmark_ids)
     A = zeros(obs_per_landmarks(landmark_id),obs_per_landmarks(landmark_id));
     for m=1:obs_per_landmarks(landmark_id)-1
         for n=(m+1):obs_per_landmarks(landmark_id)
-            A(m,n) = box_minus(bearing_values(m),bearing_values(n));
+            A(m,n) = diff_(bearing_values(m),bearing_values(n));
             if A(m,n)>pi/2
                 A(m,n)=pi-A(m,n);
             endif
