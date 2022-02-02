@@ -7,8 +7,7 @@ addpath "./dataset";
 source "functions.m";
 source "do_Least_Square_Magic.m";
 
-##Extraction of data from .g2o files
-
+#Extraction of data from .g2o files
 [land_gt, pose_gt, trans_gt, obs_gt] = loadG2o('slam2D_bearing_only_ground_truth.g2o');
 [land_ig, pose_ig, trans_ig, obs_ig] = loadG2o('slam2D_bearing_only_initial_guess.g2o');
 
@@ -147,6 +146,8 @@ for i=1:length(landmark_ids)
     endif
 end
 
+
+%applying LS
 iterations=5;
 clc;
 

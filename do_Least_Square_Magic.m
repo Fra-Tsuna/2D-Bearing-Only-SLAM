@@ -37,20 +37,13 @@ function [Xr_corr, Xl_corr, chi_stats_poses, chi_stats_bearings] = do_Least_Squa
             pose_i_H=poseMatrixIndex(pose_i, Nr, Nl);
             pose_j_H=poseMatrixIndex(pose_j, Nr, Nl);
 
-            Hr(pose_i_H:pose_i_H+3-1,
-            pose_i_H:pose_i_H+3-1)+=Ji'*Ji;
+            Hr(pose_i_H:pose_i_H+2, pose_i_H:pose_i_H+2)+=Ji'*Ji;
+            Hr(pose_i_H:pose_i_H+2, pose_j_H:pose_j_H+2)+=Ji'*Jj;
+            Hr(pose_j_H:pose_j_H+2, pose_i_H:pose_i_H+2)+=Jj'*Ji;
+            Hr(pose_j_H:pose_j_H+2, pose_j_H:pose_j_H+2)+=Jj'*Jj;
 
-            Hr(pose_i_H:pose_i_H+3-1,
-            pose_j_H:pose_j_H+3-1)+=Ji'*Jj;
-
-            Hr(pose_j_H:pose_j_H+3-1,
-            pose_i_H:pose_i_H+3-1)+=Jj'*Ji;
-
-            Hr(pose_j_H:pose_j_H+3-1,
-            pose_j_H:pose_j_H+3-1)+=Jj'*Jj;
-
-            br(pose_i_H:pose_i_H+3-1)+=Ji'*err;
-            br(pose_j_H:pose_j_H+3-1)+=Jj'*err;
+            br(pose_i_H:pose_i_H+2)+=Ji'*err;
+            br(pose_j_H:pose_j_H+2)+=Jj'*err;
         end
 
         Hl = zeros(state_dim, state_dim);
@@ -70,20 +63,13 @@ function [Xr_corr, Xl_corr, chi_stats_poses, chi_stats_bearings] = do_Least_Squa
             pose_i_H=poseMatrixIndex(pose_i, Nr, Nl);
             land_j_H=landmarkMatrixIndex(land_j, Nr, Nl);
 
-            Hl(pose_i_H:pose_i_H+3-1,
-            pose_i_H:pose_i_H+3-1)+=Jr_i'*Jr_i;
+            Hl(pose_i_H:pose_i_H+2, pose_i_H:pose_i_H+2)+=Jr_i'*Jr_i;
+            Hl(pose_i_H:pose_i_H+2, land_j_H:land_j_H+1)+=Jr_i'*Jl_j;
+            Hl(land_j_H:land_j_H+1, land_j_H:land_j_H+1)+=Jl_j'*Jl_j;
+            Hl(land_j_H:land_j_H+1, pose_i_H:pose_i_H+2)+=Jl_j'*Jr_i;
 
-            Hl(pose_i_H:pose_i_H+3-1,
-            land_j_H:land_j_H+2-1)+=Jr_i'*Jl_j;
-
-            Hl(land_j_H:land_j_H+2-1,
-            land_j_H:land_j_H+2-1)+=Jl_j'*Jl_j;
-
-            Hl(land_j_H:land_j_H+2-1,
-            pose_i_H:pose_i_H+3-1)+=Jl_j'*Jr_i;
-
-            bl(pose_i_H:pose_i_H+3-1)+=Jr_i'*err;
-            bl(land_j_H:land_j_H+2-1)+=Jl_j'*err;
+            bl(pose_i_H:pose_i_H+2)+=Jr_i'*err;
+            bl(land_j_H:land_j_H+1)+=Jl_j'*err;
         end
 
         H=Hr+Hl+eye(state_dim,state_dim)*1e-5;

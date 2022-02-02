@@ -16,13 +16,6 @@ function v = t2v(A)
 endfunction;
 
 
-function v=flattenIsometryByColumns(T)
-        v=zeros(6,1);
-        v(1:4)=reshape(T(1:2,1:2),4,1);
-        v(5:6)=T(1:2,3);
-endfunction
-
-
 function delta_theta = diff_(theta1, theta2)
 	difference = theta2-theta1;
     if (difference>pi)
@@ -119,7 +112,6 @@ endfunction;
 
 
 function v_idx=landmarkMatrixIndex(landmark_index, num_poses, num_landmarks)
-       
         pose_dim=3;
         landmark_dim=2;
 
